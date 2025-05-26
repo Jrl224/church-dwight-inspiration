@@ -53,11 +53,16 @@ function generatePrompt(category: string, brand?: string | null): string {
     'pet-care': `Design a photorealistic ${selectedBrand} pet product with ${trend}. Display pet-friendly packaging, clear usage instructions, premium quality appearance, studio lighting, white background.`,
     
     'sexual-wellness': `Create a tasteful, professional product photo of ${selectedBrand} wellness product with ${trend}. Elegant packaging, discrete design, pharmaceutical quality, soft lighting, white background.`,
-    
-    'all': generatePrompt(Object.keys(categoryPrompts)[Math.floor(Math.random() * Object.keys(categoryPrompts).length)], brand),
   };
 
-  return categoryPrompts[category] || categoryPrompts['all'];
+  // Handle 'all' category by randomly selecting another category
+  if (category === 'all') {
+    const categories = Object.keys(categoryPrompts);
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    return generatePrompt(randomCategory, brand);
+  }
+
+  return categoryPrompts[category] || categoryPrompts['laundry']; // Default to laundry if category not found
 }
 
 // Generate product features based on category and trends
