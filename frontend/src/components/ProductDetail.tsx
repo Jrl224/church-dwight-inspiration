@@ -39,36 +39,54 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
             </button>
 
             <div className="grid md:grid-cols-2 gap-8">
+              {/* Product Image */}
               <div className="relative">
                 <img
                   src={product.imageUrl}
-                  alt={product.name}
+                  alt={product.productName || product.name}
                   className="w-full rounded-xl shadow-lg"
                 />
-                {product.sustainabilityScore && (
-                  <div className="absolute top-4 left-4 bg-green-500 text-white px-4 py-2 rounded-full">
-                    {product.sustainabilityScore}% Sustainable
+                {product.sustainability && (
+                  <div className="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full font-semibold">
+                    ECO-INNOVATION
                   </div>
                 )}
               </div>
 
+              {/* Product Info */}
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h2>
-                <p className="text-xl text-gray-600 mb-6">{product.brand} • {product.category}</p>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  {product.productName || product.name}
+                </h2>
+                <p className="text-xl text-gray-600 mb-4">
+                  {product.brand} • {product.category?.replace('-', ' ').toUpperCase()}
+                </p>
+                
+                {/* Innovation Tag */}
+                {product.innovation && (
+                  <div className="mb-6">
+                    <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded-lg inline-block">
+                      <span className="font-semibold">Innovation: </span>
+                      {product.innovation}
+                    </div>
+                  </div>
+                )}
 
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-3">Key Features</h3>
-                  <ul className="space-y-2">
-                    {product.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {/* Market Disruption */}
+                {product.marketDisruption && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-2 text-red-600">Market Disruption</h3>
+                    <p className="text-gray-700">{product.marketDisruption}</p>
+                  </div>
+                )}
+
+                {/* Consumer Insight */}
+                {product.consumerInsight && (
+                  <div className="mb-6 bg-blue-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-2 text-blue-700">Consumer Insight</h3>
+                    <p className="text-gray-700">{product.consumerInsight}</p>
+                  </div>
+                )}
 
                 <div className="flex flex-wrap gap-3">
                   <button
@@ -87,8 +105,68 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
               </div>
             </div>
 
+            {/* Infographic Section */}
+            <div className="mt-8 grid md:grid-cols-3 gap-6">
+              {/* Key Features */}
+              {product.features && (
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl">
+                  <h4 className="font-bold text-lg mb-4 text-blue-800">Key Features</h4>
+                  <ul className="space-y-3">
+                    {(Array.isArray(product.features) ? product.features : Object.entries(product.features || {})).map((feature, index) => (
+                      <li key={index} className="flex items-start">
+                        <svg className="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">
+                          {Array.isArray(product.features) ? feature : `${feature[0]}: ${feature[1]}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Ingredients/Technology */}
+              {product.ingredients && (
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl">
+                  <h4 className="font-bold text-lg mb-4 text-green-800">Ingredients & Technology</h4>
+                  <div className="space-y-2">
+                    {(Array.isArray(product.ingredients) ? product.ingredients : [product.ingredients]).map((ingredient, index) => (
+                      <div key={index} className="bg-white bg-opacity-70 px-3 py-2 rounded-lg text-sm">
+                        {ingredient}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Usage & Pricing */}
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl">
+                <h4 className="font-bold text-lg mb-4 text-purple-800">Product Details</h4>
+                {product.usage && (
+                  <div className="mb-4">
+                    <h5 className="font-semibold text-sm text-purple-700 mb-1">Usage</h5>
+                    <p className="text-gray-700 text-sm">{product.usage}</p>
+                  </div>
+                )}
+                {product.price && (
+                  <div className="mb-4">
+                    <h5 className="font-semibold text-sm text-purple-700 mb-1">Price & Size</h5>
+                    <p className="text-gray-700 text-sm">{product.price}</p>
+                  </div>
+                )}
+                {product.sustainability && (
+                  <div>
+                    <h5 className="font-semibold text-sm text-purple-700 mb-1">Sustainability</h5>
+                    <p className="text-gray-700 text-sm">{product.sustainability}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* AI Generation Info */}
             <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-              <h4 className="font-semibold text-gray-700 mb-2">AI Generation Prompt</h4>
+              <h4 className="font-semibold text-gray-700 mb-2">AI Generation Details</h4>
               <p className="text-sm text-gray-600 italic">{product.prompt}</p>
             </div>
           </div>
