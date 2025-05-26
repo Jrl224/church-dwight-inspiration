@@ -21,23 +21,20 @@ const InspireButton: React.FC<InspireButtonProps> = ({ onGenerate, isGenerating,
     }
 
     setError(null);
-    setProgress('Researching market trends...');
+    setProgress('Creating innovative concept...');
     onGenerate();
     setIsGenerating(true);
 
     try {
-      setTimeout(() => setProgress('Creating innovative concept...'), 2000);
-      setTimeout(() => setProgress('Generating product image...'), 4000);
+      setTimeout(() => setProgress('Generating product image...'), 1000);
       
       const products = await generateProducts({
         category: selectedCategory,
         brand: selectedBrand,
-        count: 1, // Generate 1 product at a time for speed
+        count: 1,
       });
 
-      // Store session ID if returned
       if (products.length > 0) {
-        // Use the first product's ID as session ID for now
         setSessionId(products[0].id);
       }
 
@@ -108,7 +105,7 @@ const InspireButton: React.FC<InspireButtonProps> = ({ onGenerate, isGenerating,
       )}
       
       <p className="mt-4 text-xs text-gray-400">
-        Powered by GPT-3.5 & DALL-E 3 • Each generation creates a unique concept
+        Powered by DALL-E 3 • Instant innovation generation
       </p>
     </div>
   );
