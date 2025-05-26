@@ -2,7 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
 import { v4 as uuidv4 } from 'uuid';
 
-// Initialize OpenAI with better error handling
+// Initialize OpenAI
 let openai: OpenAI | null = null;
 
 try {
@@ -17,7 +17,7 @@ try {
   console.error('Failed to initialize OpenAI:', error);
 }
 
-// Brand mapping for Church & Dwight products
+// Brand mapping
 const brandsByCategory: Record<string, string[]> = {
   'laundry': ['ARM & HAMMER', 'OXICLEAN', 'XTRA'],
   'oral-care': ['ARM & HAMMER', 'THERABREATH', 'WATERPIK', 'SPINBRUSH', 'ORAJEL'],
@@ -28,68 +28,52 @@ const brandsByCategory: Record<string, string[]> = {
   'sexual-wellness': ['TROJAN', 'FIRST RESPONSE'],
 };
 
-async function generateInnovativeProductConcept(category: string, brand: string) {
-  if (!openai) throw new Error('OpenAI not initialized');
+// Pre-defined innovations for speed
+const innovations = [
+  { tech: 'AI-powered personalization', desc: 'adapts to your unique needs' },
+  { tech: 'biodegradable capsules', desc: 'dissolves completely in water' },
+  { tech: 'microbiome technology', desc: 'supports natural balance' },
+  { tech: 'carbon-negative formula', desc: 'removes CO2 from atmosphere' },
+  { tech: 'smart sensor technology', desc: 'tracks usage and effectiveness' },
+  { tech: 'waterless concentrate', desc: 'just add water at home' },
+  { tech: 'probiotic-enhanced', desc: 'promotes healthy bacteria' },
+  { tech: 'plant-based enzymes', desc: '100% natural cleaning power' },
+  { tech: 'zero-waste refills', desc: 'reusable forever packaging' },
+  { tech: 'UV-activated formula', desc: 'powered by sunlight' },
+];
 
-  const systemPrompt = `You are a product innovation expert. Create a breakthrough product concept for ${brand} in the ${category} category. Be specific and innovative.`;
-
-  const userPrompt = `Create an innovative ${category} product for ${brand}. Generate:
-1. Product name
-2. Key innovation (one sentence)
-3. Market disruption potential (one sentence) 
-4. Consumer insight (one sentence)
-5. DALL-E prompt (detailed product photography description)
-6. 3 key features (brief)
-7. Main ingredient/technology
-8. Usage (brief)
-9. Price
-10. Sustainability feature
-
-Format as JSON. Be creative and specific.`;
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-1106", // Using faster model to avoid timeout
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      temperature: 0.9,
-      max_tokens: 800,
-      response_format: { type: "json_object" }
-    });
-
-    const response = completion.choices[0].message.content;
-    if (!response) throw new Error('No response from GPT');
-
-    return JSON.parse(response);
-  } catch (error) {
-    console.error('GPT Error:', error);
-    // Fallback to creative prompt generation
-    return generateFallbackConcept(category, brand);
-  }
-}
-
-function generateFallbackConcept(category: string, brand: string) {
-  const innovations = [
-    'AI-powered personalization', 'biodegradable capsules', 'microbiome technology',
-    'carbon-negative formula', 'smart sensors', 'waterless technology',
-    'probiotic-enhanced', 'DNA-customized', 'zero-waste refills'
-  ];
-  
+function generateQuickConcept(category: string, brand: string) {
   const innovation = innovations[Math.floor(Math.random() * innovations.length)];
+  const categoryClean = category.replace('-', ' ');
+  
+  const productNames: Record<string, string[]> = {
+    'laundry': ['UltraClean', 'FreshWave', 'PureWash', 'EcoBoost', 'SmartClean'],
+    'oral-care': ['SmileBright', 'FreshGuard', 'TeethShield', 'OralPure', 'MouthCare'],
+    'personal-care': ['SkinGlow', 'BodyFresh', 'PureTouch', 'DermaCare', 'Refresh'],
+    'health': ['VitaBoost', 'HealthPlus', 'NutriCore', 'WellnessMax', 'LifeForce'],
+    'home-care': ['CleanMaster', 'HomePure', 'SparkleClean', 'FreshHome', 'PowerClean'],
+    'pet-care': ['PetFresh', 'FurCare', 'PawPure', 'AnimalWell', 'PetGuard'],
+    'sexual-wellness': ['IntimaCare', 'LovePlus', 'PureTouch', 'WellnessPlus', 'CareMax'],
+  };
+  
+  const baseName = productNames[category]?.[Math.floor(Math.random() * 5)] || 'Innovation';
+  const productName = `${brand} ${baseName} ${innovation.tech.split(' ')[0]}`;
   
   return {
-    productName: `${brand} Future ${category.replace('-', ' ')} with ${innovation}`,
-    innovation: innovation,
-    marketDisruption: `First ${category} product with ${innovation} technology`,
-    consumerInsight: `Consumers want sustainable, personalized ${category} solutions`,
-    dallePrompt: `Ultra high-definition product photography: Futuristic ${brand} ${category} product featuring ${innovation}. Hyper-realistic 8K quality, perfect studio lighting, premium packaging with holographic accents, white background, award-winning commercial photography.`,
-    features: ['Eco-friendly formula', 'Clinically proven results', '90% less plastic packaging'],
-    ingredients: `Advanced ${innovation} complex`,
-    usage: 'Use daily for best results',
-    price: '$24.99 - 32oz',
-    sustainability: 'Carbon neutral production'
+    productName,
+    innovation: innovation.tech,
+    marketDisruption: `First ${categoryClean} product that ${innovation.desc}`,
+    consumerInsight: `Modern consumers want ${categoryClean} products that are both effective and sustainable`,
+    dallePrompt: `Professional product photography: ${brand} ${categoryClean} product bottle with ${innovation.tech}, modern minimalist packaging, white background, studio lighting, photorealistic, commercial photography`,
+    features: [
+      `Uses ${innovation.tech}`,
+      'Clinically proven effectiveness',
+      'Eco-friendly packaging'
+    ],
+    ingredients: `Advanced ${innovation.tech} complex`,
+    usage: 'Use as directed for best results',
+    price: '$19.99 - 24oz',
+    sustainability: '100% recyclable packaging, carbon neutral production'
   };
 }
 
@@ -115,9 +99,7 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Check if OpenAI is initialized
   if (!openai) {
-    console.error('OpenAI client not initialized');
     return res.status(500).json({ 
       error: 'OpenAI API not configured',
       details: 'Please ensure OPENAI_API_KEY is set in environment variables'
@@ -125,61 +107,36 @@ export default async function handler(
   }
 
   try {
-    const { category, brand: requestedBrand, count = 1 } = req.body; // Reduced to 1 for faster response
+    const { category, brand: requestedBrand } = req.body;
 
     if (!category) {
       return res.status(400).json({ error: 'Category is required' });
     }
 
-    console.log('Generating innovative concepts for:', { category, requestedBrand, count });
+    console.log('Generating for:', { category, requestedBrand });
 
-    const images = [];
-    
-    // Generate only 1 image to avoid timeout
+    // Select brand
     const brand = requestedBrand || brandsByCategory[category]?.[Math.floor(Math.random() * brandsByCategory[category].length)] || 'ARM & HAMMER';
     
-    // Generate innovative concept
-    console.log(`Generating concept for ${brand}...`);
-    const concept = await generateInnovativeProductConcept(category, brand);
+    // Generate concept quickly without GPT
+    const concept = generateQuickConcept(category, brand);
     
-    // Generate image using DALL-E 3
-    console.log(`Creating image...`);
-    try {
-      const imageResponse = await openai.images.generate({
-        model: "dall-e-3",
-        prompt: concept.dallePrompt || `Photorealistic ${brand} ${category} product with innovative packaging, studio photography, white background`,
-        n: 1,
-        size: "1024x1024",
-        quality: "standard", // Using standard for faster generation
-        style: "vivid",
-      });
+    // Generate image
+    console.log('Creating image...');
+    const imageResponse = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: concept.dallePrompt,
+      n: 1,
+      size: "1024x1024",
+      quality: "standard",
+      style: "natural", // 'natural' is faster than 'vivid'
+    });
 
-      if (imageResponse.data && imageResponse.data[0]) {
-        images.push({
-          id: uuidv4(),
-          url: imageResponse.data[0].url,
-          localPath: '',
-          prompt: concept.dallePrompt,
-          brand: brand,
-          category: category,
-          productName: concept.productName,
-          innovation: concept.innovation,
-          marketDisruption: concept.marketDisruption,
-          consumerInsight: concept.consumerInsight,
-          features: concept.features,
-          ingredients: concept.ingredients,
-          usage: concept.usage,
-          price: concept.price,
-          sustainability: concept.sustainability,
-          createdAt: new Date().toISOString(),
-        });
-      }
-    } catch (imageError: any) {
-      console.error('DALL-E Error:', imageError);
-      // Return concept without image if DALL-E fails
+    const images = [];
+    if (imageResponse.data && imageResponse.data[0]) {
       images.push({
         id: uuidv4(),
-        url: 'https://via.placeholder.com/1024x1024/E5E7EB/6B7280?text=Image+Generation+Failed',
+        url: imageResponse.data[0].url,
         localPath: '',
         prompt: concept.dallePrompt,
         brand: brand,
@@ -197,20 +154,16 @@ export default async function handler(
       });
     }
 
-    // Generate session ID if needed
-    const sessionId = req.headers['x-session-id'] as string || uuidv4();
-
     return res.status(200).json({
       images,
-      sessionId,
+      sessionId: uuidv4(),
       totalGenerated: images.length,
     });
   } catch (error: any) {
-    console.error('Error in generate handler:', error);
-    
+    console.error('Error:', error);
     return res.status(500).json({ 
-      error: 'Failed to generate concepts',
-      details: error.message || 'Unknown error occurred'
+      error: 'Failed to generate',
+      details: error.message
     });
   }
 }
