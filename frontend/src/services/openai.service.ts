@@ -34,37 +34,6 @@ const innovationTrends = [
   'carbon neutral',
 ];
 
-// Generate prompts for DALL-E 3
-function generatePrompt(category: string, brand?: string | null): string {
-  const selectedBrand = brand || brandsByCategory[category]?.[Math.floor(Math.random() * brandsByCategory[category].length)] || 'Church & Dwight';
-  const trend = innovationTrends[Math.floor(Math.random() * innovationTrends.length)];
-  
-  const categoryPrompts: Record<string, string> = {
-    'laundry': `Create a hyper-realistic product photo of an innovative ${selectedBrand} laundry detergent featuring ${trend}. Show professional packaging with clear branding, modern design, photorealistic textures, studio lighting on white background with subtle shadows. Include visible product benefits and eco-friendly badges.`,
-    
-    'oral-care': `Generate a photorealistic ${selectedBrand} oral care product with ${trend}. Display sleek packaging, clear brand logo, innovative features visible, medical-grade aesthetic, premium quality rendering, white background, professional product photography style.`,
-    
-    'personal-care': `Design a hyper-realistic ${selectedBrand} personal care product incorporating ${trend}. Show luxury packaging, clear ingredient callouts, modern minimalist design, high-end product photography, perfect lighting, white background.`,
-    
-    'health': `Create a photorealistic ${selectedBrand} vitamin/supplement bottle with ${trend}. Display clear nutritional information, modern pharmaceutical design, trust-inspiring packaging, studio quality rendering, white background.`,
-    
-    'home-care': `Generate a realistic ${selectedBrand} cleaning product featuring ${trend}. Show powerful cleaning claims, modern bottle design, clear brand identity, professional product shot, white background with reflections.`,
-    
-    'pet-care': `Design a photorealistic ${selectedBrand} pet product with ${trend}. Display pet-friendly packaging, clear usage instructions, premium quality appearance, studio lighting, white background.`,
-    
-    'sexual-wellness': `Create a tasteful, professional product photo of ${selectedBrand} wellness product with ${trend}. Elegant packaging, discrete design, pharmaceutical quality, soft lighting, white background.`,
-  };
-
-  // Handle 'all' category by randomly selecting another category
-  if (category === 'all') {
-    const categories = Object.keys(categoryPrompts);
-    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-    return generatePrompt(randomCategory, brand);
-  }
-
-  return categoryPrompts[category] || categoryPrompts['laundry']; // Default to laundry if category not found
-}
-
 // Generate product features based on category and trends
 function generateFeatures(category: string): string[] {
   const baseFeatures = [

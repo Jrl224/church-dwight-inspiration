@@ -7,7 +7,7 @@ import { useStore } from './store';
 import './App.css';
 
 function App() {
-  const { selectedCategory, selectedBrand, generatedProducts, selectedProduct } = useStore();
+  const { generatedProducts, selectedProduct } = useStore();
   const [isGenerating, setIsGenerating] = useState(false);
 
   return (
