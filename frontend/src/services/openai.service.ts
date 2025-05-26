@@ -10,16 +10,18 @@ interface GenerateProductsParams {
 }
 
 export async function generateProducts(params: GenerateProductsParams): Promise<Product[]> {
-  const { category, brand, count = 2 } = params;
+  const { category, brand, count = 1 } = params; // Default to 1 for faster generation
   
   try {
     console.log('Calling API with:', { url: `${API_BASE_URL}/generate`, params });
     
-    // Call backend API which will handle OpenAI GPT-4 + DALL-E 3 generation
+    // Call backend API which will handle OpenAI GPT + DALL-E 3 generation
     const response = await axios.post(`${API_BASE_URL}/generate`, {
       category,
       brand,
       count,
+    }, {
+      timeout: 30000 // 30 second timeout
     });
 
     console.log('API Response:', response.data);
@@ -35,7 +37,7 @@ export async function generateProducts(params: GenerateProductsParams): Promise<
       prompt: image.prompt,
       createdAt: new Date(image.createdAt),
       
-      // New innovative fields from GPT-4
+      // New innovative fields from GPT
       productName: image.productName,
       innovation: image.innovation,
       marketDisruption: image.marketDisruption,
@@ -57,8 +59,12 @@ export async function generateProducts(params: GenerateProductsParams): Promise<
     console.error('Error details:', error.response?.data);
     
     // Provide more helpful error messages
-    if (error.response?.data?.details) {
+    if (error.code === 'ECONNABORTED') {
+      throw new Error('Request timed out. Please try again.');
+    } else if (error.response?.data?.details) {
       throw new Error(error.response.data.details);
+    } else if (error.response?.status === 504) {
+      throw new Error('The server took too long to respond. Please try again.');
     } else if (error.response?.status === 500 && error.response?.data?.error === 'OpenAI API not configured') {
       throw new Error('The OpenAI API key is not configured. Please check server settings.');
     } else if (error.response?.status === 500) {
