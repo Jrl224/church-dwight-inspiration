@@ -9,31 +9,6 @@ interface GenerateProductsParams {
   count?: number;
 }
 
-// Brand mapping for Church & Dwight products
-const brandsByCategory: Record<string, string[]> = {
-  'laundry': ['ARM & HAMMER', 'OXICLEAN', 'XTRA'],
-  'oral-care': ['ARM & HAMMER', 'THERABREATH', 'WATERPIK', 'SPINBRUSH', 'ORAJEL'],
-  'personal-care': ['BATISTE', 'NAIR', 'FLAWLESS', 'ARM & HAMMER'],
-  'health': ['VITAFUSION', 'L\'IL CRITTERS', 'ZICAM'],
-  'home-care': ['ARM & HAMMER', 'KABOOM', 'OXICLEAN'],
-  'pet-care': ['ARM & HAMMER'],
-  'sexual-wellness': ['TROJAN', 'FIRST RESPONSE'],
-};
-
-// Innovation trends to incorporate
-const innovationTrends = [
-  'sustainable packaging',
-  'plant-based formula',
-  'probiotic technology',
-  'AI-optimized',
-  'refillable system',
-  'zero waste',
-  'aromatherapy infused',
-  'customizable',
-  'subscription-ready',
-  'carbon neutral',
-];
-
 // Generate product features based on category and trends
 function generateFeatures(category: string): string[] {
   const baseFeatures = [
