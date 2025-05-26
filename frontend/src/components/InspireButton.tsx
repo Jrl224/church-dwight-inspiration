@@ -6,9 +6,10 @@ import { generateProducts } from '../services/openai.service';
 interface InspireButtonProps {
   onGenerate: () => void;
   isGenerating: boolean;
+  setIsGenerating: (value: boolean) => void;
 }
 
-const InspireButton: React.FC<InspireButtonProps> = ({ onGenerate, isGenerating }) => {
+const InspireButton: React.FC<InspireButtonProps> = ({ onGenerate, isGenerating, setIsGenerating }) => {
   const { selectedCategory, selectedBrand, addGeneratedProducts } = useStore();
 
   const handleClick = async () => {
@@ -30,6 +31,8 @@ const InspireButton: React.FC<InspireButtonProps> = ({ onGenerate, isGenerating 
     } catch (error) {
       console.error('Generation failed:', error);
       alert('Failed to generate products. Please try again.');
+    } finally {
+      setIsGenerating(false);
     }
   };
 

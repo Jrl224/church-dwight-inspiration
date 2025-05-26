@@ -28,6 +28,7 @@ function App() {
           <InspireButton 
             onGenerate={() => setIsGenerating(true)}
             isGenerating={isGenerating}
+            setIsGenerating={setIsGenerating}
           />
         </div>
 
