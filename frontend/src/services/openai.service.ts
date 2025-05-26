@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Product } from '../store';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 interface GenerateProductsParams {
   category: string;
@@ -105,6 +105,8 @@ export async function generateProducts(params: GenerateProductsParams): Promise<
   const { category, brand, count = 9 } = params;
   
   try {
+    console.log('Calling API with:', { url: `${API_BASE_URL}/generate`, params });
+    
     // Call backend API which will handle OpenAI DALL-E 3 generation
     const response = await axios.post(`${API_BASE_URL}/generate`, {
       category,
@@ -112,11 +114,13 @@ export async function generateProducts(params: GenerateProductsParams): Promise<
       count,
     });
 
+    console.log('API Response:', response.data);
+
     // Transform response data into Product format
     const products: Product[] = response.data.images.map((image: any) => ({
       id: image.id,
       imageUrl: image.url,
-      localPath: image.localPath,
+      localPath: image.localPath || '',
       name: generateProductName(category, image.brand || brand || 'Church & Dwight'),
       brand: image.brand || brand || 'Church & Dwight',
       category: category,
@@ -127,9 +131,22 @@ export async function generateProducts(params: GenerateProductsParams): Promise<
     }));
 
     return products;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to generate products:', error);
-    throw error;
+    console.error('Error details:', error.response?.data);
+    
+    // Provide more helpful error messages
+    if (error.response?.data?.details) {
+      throw new Error(error.response.data.details);
+    } else if (error.response?.status === 500 && error.response?.data?.error === 'OpenAI API not configured') {
+      throw new Error('The OpenAI API key is not configured. Please check server settings.');
+    } else if (error.response?.status === 500) {
+      throw new Error('Server error. Please check the console for details.');
+    } else if (error.message === 'Network Error') {
+      throw new Error('Cannot connect to the server. Please check if the API is running.');
+    } else {
+      throw error;
+    }
   }
 }
 

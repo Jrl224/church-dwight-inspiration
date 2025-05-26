@@ -24,13 +24,13 @@ const InspireButton: React.FC<InspireButtonProps> = ({ onGenerate, isGenerating,
       const products = await generateProducts({
         category: selectedCategory,
         brand: selectedBrand,
-        count: 9
+        count: 1 // Start with 1 for testing
       });
       
       addGeneratedProducts(products);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Generation failed:', error);
-      alert('Failed to generate products. Please try again.');
+      alert(error.message || 'Failed to generate products. Please try again.');
     } finally {
       setIsGenerating(false);
     }
