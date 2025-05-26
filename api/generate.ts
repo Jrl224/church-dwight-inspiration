@@ -28,48 +28,50 @@ const brandsByCategory: Record<string, string[]> = {
   'sexual-wellness': ['TROJAN', 'FIRST RESPONSE'],
 };
 
-// Innovation trends
-const innovationTrends = [
-  'sustainable packaging',
-  'plant-based formula',
-  'probiotic technology',
-  'AI-optimized',
-  'refillable system',
-  'zero waste',
-  'aromatherapy infused',
-  'customizable',
-  'subscription-ready',
-  'carbon neutral',
-];
+async function generateInnovativeProductConcept(category: string, brand: string) {
+  if (!openai) throw new Error('OpenAI not initialized');
 
-function generatePrompt(category: string, brand?: string | null): string {
-  const selectedBrand = brand || brandsByCategory[category]?.[Math.floor(Math.random() * brandsByCategory[category].length)] || 'Church & Dwight';
-  const trend = innovationTrends[Math.floor(Math.random() * innovationTrends.length)];
-  
-  const categoryPrompts: Record<string, string> = {
-    'laundry': `Create a hyper-realistic product photo of an innovative ${selectedBrand} laundry detergent featuring ${trend}. Show professional packaging with clear branding, modern design, photorealistic textures, studio lighting on white background with subtle shadows. Include visible product benefits and eco-friendly badges.`,
-    
-    'oral-care': `Generate a photorealistic ${selectedBrand} oral care product with ${trend}. Display sleek packaging, clear brand logo, innovative features visible, medical-grade aesthetic, premium quality rendering, white background, professional product photography style.`,
-    
-    'personal-care': `Design a hyper-realistic ${selectedBrand} personal care product incorporating ${trend}. Show luxury packaging, clear ingredient callouts, modern minimalist design, high-end product photography, perfect lighting, white background.`,
-    
-    'health': `Create a photorealistic ${selectedBrand} vitamin/supplement bottle with ${trend}. Display clear nutritional information, modern pharmaceutical design, trust-inspiring packaging, studio quality rendering, white background.`,
-    
-    'home-care': `Generate a realistic ${selectedBrand} cleaning product featuring ${trend}. Show powerful cleaning claims, modern bottle design, clear brand identity, professional product shot, white background with reflections.`,
-    
-    'pet-care': `Design a photorealistic ${selectedBrand} pet product with ${trend}. Display pet-friendly packaging, clear usage instructions, premium quality appearance, studio lighting, white background.`,
-    
-    'sexual-wellness': `Create a tasteful, professional product photo of ${selectedBrand} wellness product with ${trend}. Elegant packaging, discrete design, pharmaceutical quality, soft lighting, white background.`,
-  };
+  const systemPrompt = `You are a world-class product innovation strategist for Church & Dwight. Your role is to create breakthrough product concepts that would genuinely excite consumers and disrupt the market. You research competitors, analyze trends, and create products that don't exist yet but should.`;
 
-  // Handle 'all' category by randomly selecting another category
-  if (category === 'all') {
-    const categories = Object.keys(categoryPrompts);
-    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-    return generatePrompt(randomCategory, brand);
-  }
+  const userPrompt = `Create an innovative ${category} product concept for ${brand}. 
 
-  return categoryPrompts[category] || categoryPrompts['laundry']; // Default to laundry if category not found
+IMPORTANT: 
+1. Research what competitors like P&G, Unilever, Colgate, etc. are doing in this space
+2. Identify a genuine unmet consumer need or pain point
+3. Create a product that doesn't exist yet but would be groundbreaking
+4. Think about sustainability, technology integration, personalization, or new usage occasions
+5. Be specific about the innovation - not generic
+
+Generate a detailed response with:
+1. A hyper-specific product name and description
+2. The key innovation/technology that makes it unique
+3. Why this would disrupt the market
+4. Target consumer insight
+5. A detailed DALL-E 3 prompt for generating a photorealistic product image
+6. Product details for an infographic including:
+   - 3 key features with specific benefits
+   - Ingredients/technology highlights
+   - Usage instructions
+   - Price point and size
+   - Sustainability features
+
+Format as JSON with fields: productName, innovation, marketDisruption, consumerInsight, dallePrompt, features, ingredients, usage, price, sustainability`;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4-turbo-preview",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
+    ],
+    temperature: 0.9, // Higher for more creativity
+    max_tokens: 1500,
+    response_format: { type: "json_object" }
+  });
+
+  const response = completion.choices[0].message.content;
+  if (!response) throw new Error('No response from GPT-4');
+
+  return JSON.parse(response);
 }
 
 export default async function handler(
@@ -104,49 +106,67 @@ export default async function handler(
   }
 
   try {
-    const { category, brand, count = 1 } = req.body;
+    const { category, brand: requestedBrand, count = 2 } = req.body;
 
     if (!category) {
       return res.status(400).json({ error: 'Category is required' });
     }
 
-    console.log('Generating images for:', { category, brand, count });
+    console.log('Generating innovative concepts for:', { category, requestedBrand, count });
 
     const images = [];
     
-    // Generate multiple images (limit to 1 for now to save costs during testing)
-    for (let i = 0; i < Math.min(count, 1); i++) {
-      const prompt = generatePrompt(category, brand);
-      console.log('Using prompt:', prompt);
-      
+    // Generate multiple unique concepts
+    const imagesToGenerate = Math.min(count, 3);
+    
+    for (let i = 0; i < imagesToGenerate; i++) {
       try {
-        const response = await openai.images.generate({
+        // Select a brand if not specified
+        const brand = requestedBrand || brandsByCategory[category]?.[Math.floor(Math.random() * brandsByCategory[category].length)] || 'ARM & HAMMER';
+        
+        // Generate innovative concept using GPT-4
+        console.log(`Generating concept ${i + 1}/${imagesToGenerate} for ${brand}...`);
+        const concept = await generateInnovativeProductConcept(category, brand);
+        
+        // Generate image using DALL-E 3
+        console.log(`Creating image for: ${concept.productName}`);
+        const imageResponse = await openai.images.generate({
           model: "dall-e-3",
-          prompt: prompt,
+          prompt: concept.dallePrompt,
           n: 1,
           size: "1024x1024",
-          quality: "standard", // Use standard quality for testing
+          quality: "hd",
           style: "vivid",
         });
 
-        if (response.data && response.data[0]) {
+        if (imageResponse.data && imageResponse.data[0]) {
           images.push({
             id: uuidv4(),
-            url: response.data[0].url,
-            localPath: '', // Not used in Vercel deployment
-            prompt: prompt,
-            brand: brand || brandsByCategory[category]?.[0] || 'Church & Dwight',
+            url: imageResponse.data[0].url,
+            localPath: '',
+            prompt: concept.dallePrompt,
+            brand: brand,
+            category: category,
+            productName: concept.productName,
+            innovation: concept.innovation,
+            marketDisruption: concept.marketDisruption,
+            consumerInsight: concept.consumerInsight,
+            features: concept.features,
+            ingredients: concept.ingredients,
+            usage: concept.usage,
+            price: concept.price,
+            sustainability: concept.sustainability,
             createdAt: new Date().toISOString(),
           });
         }
-      } catch (imageError: any) {
-        console.error('Error generating individual image:', imageError);
-        // Continue with other images if one fails
+      } catch (conceptError: any) {
+        console.error(`Error generating concept ${i + 1}:`, conceptError);
+        // Continue with other concepts if one fails
       }
     }
 
     if (images.length === 0) {
-      throw new Error('No images were generated successfully');
+      throw new Error('No concepts were generated successfully');
     }
 
     // Generate session ID if needed
@@ -155,6 +175,7 @@ export default async function handler(
     return res.status(200).json({
       images,
       sessionId,
+      totalGenerated: images.length,
     });
   } catch (error: any) {
     console.error('Error in generate handler:', error);
@@ -176,7 +197,7 @@ export default async function handler(
     } else {
       // Other error
       return res.status(500).json({ 
-        error: 'Failed to generate images',
+        error: 'Failed to generate concepts',
         details: error.message || 'Unknown error occurred'
       });
     }
