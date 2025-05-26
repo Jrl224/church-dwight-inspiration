@@ -26,9 +26,17 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
               <div className="aspect-square relative overflow-hidden">
                 <img
                   src={product.imageUrl}
-                  alt={product.name}
+                  alt={product.productName || product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
+                
+                {/* Innovation Tag */}
+                {product.innovation && (
+                  <div className="absolute top-4 left-4 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    {product.innovation.split(' ').slice(0, 2).join(' ')}
+                  </div>
+                )}
+                
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -53,19 +61,30 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
               </div>
               
               <div className="p-4">
-                <h3 className="font-bold text-lg text-gray-900">{product.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">{product.brand} • {product.category}</p>
+                <h3 className="font-bold text-lg text-gray-900 line-clamp-2">
+                  {product.productName || product.name}
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {product.brand} • {product.category?.replace('-', ' ').toUpperCase()}
+                </p>
                 
-                {product.sustainabilityScore && (
+                {/* Market Disruption Preview */}
+                {product.marketDisruption && (
+                  <p className="text-xs text-gray-500 mt-2 line-clamp-2">
+                    {product.marketDisruption}
+                  </p>
+                )}
+                
+                {product.sustainability && (
                   <div className="mt-3 flex items-center">
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-green-500 h-2 rounded-full"
-                        style={{ width: `${product.sustainabilityScore}%` }}
+                        style={{ width: `${product.sustainabilityScore || 85}%` }}
                       />
                     </div>
                     <span className="ml-2 text-sm text-gray-600">
-                      {product.sustainabilityScore}% Eco
+                      {product.sustainabilityScore || 85}% Eco
                     </span>
                   </div>
                 )}
