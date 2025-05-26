@@ -21,8 +21,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && npm run postbuild",
-    "postbuild": "cp build/index.html build/404.html",
+    "build": "react-scripts build",
+    "postbuild": "cp build/index.html build/404.html || true",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
