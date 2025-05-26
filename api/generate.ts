@@ -2,9 +2,20 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
 import { v4 as uuidv4 } from 'uuid';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Initialize OpenAI with better error handling
+let openai: OpenAI | null = null;
+
+try {
+  if (!process.env.OPENAI_API_KEY) {
+    console.error('OPENAI_API_KEY is not set');
+  } else {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+} catch (error) {
+  console.error('Failed to initialize OpenAI:', error);
+}
 
 // Brand mapping for Church & Dwight products
 const brandsByCategory: Record<string, string[]> = {
@@ -83,6 +94,15 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Check if OpenAI is initialized
+  if (!openai) {
+    console.error('OpenAI client not initialized');
+    return res.status(500).json({ 
+      error: 'OpenAI API not configured',
+      details: 'Please ensure OPENAI_API_KEY is set in environment variables'
+    });
+  }
+
   try {
     const { category, brand, count = 1 } = req.body;
 
@@ -90,44 +110,75 @@ export default async function handler(
       return res.status(400).json({ error: 'Category is required' });
     }
 
+    console.log('Generating images for:', { category, brand, count });
+
     const images = [];
     
-    // Generate multiple images
-    for (let i = 0; i < Math.min(count, 3); i++) { // Limit to 3 for cost control
+    // Generate multiple images (limit to 1 for now to save costs during testing)
+    for (let i = 0; i < Math.min(count, 1); i++) {
       const prompt = generatePrompt(category, brand);
+      console.log('Using prompt:', prompt);
       
-      const response = await openai.images.generate({
-        model: "dall-e-3",
-        prompt: prompt,
-        n: 1,
-        size: "1024x1024",
-        quality: "hd",
-        style: "vivid",
-      });
-
-      if (response.data && response.data[0]) {
-        images.push({
-          id: uuidv4(),
-          url: response.data[0].url,
+      try {
+        const response = await openai.images.generate({
+          model: "dall-e-3",
           prompt: prompt,
-          brand: brand || brandsByCategory[category]?.[0] || 'Church & Dwight',
-          createdAt: new Date().toISOString(),
+          n: 1,
+          size: "1024x1024",
+          quality: "standard", // Use standard quality for testing
+          style: "vivid",
         });
+
+        if (response.data && response.data[0]) {
+          images.push({
+            id: uuidv4(),
+            url: response.data[0].url,
+            localPath: '', // Not used in Vercel deployment
+            prompt: prompt,
+            brand: brand || brandsByCategory[category]?.[0] || 'Church & Dwight',
+            createdAt: new Date().toISOString(),
+          });
+        }
+      } catch (imageError: any) {
+        console.error('Error generating individual image:', imageError);
+        // Continue with other images if one fails
       }
     }
 
+    if (images.length === 0) {
+      throw new Error('No images were generated successfully');
+    }
+
     // Generate session ID if needed
-    const sessionId = req.headers['x-session-id'] || uuidv4();
+    const sessionId = req.headers['x-session-id'] as string || uuidv4();
 
     return res.status(200).json({
       images,
       sessionId,
     });
   } catch (error: any) {
-    console.error('Error generating images:', error);
-    return res.status(500).json({ 
-      error: 'Failed to generate images',
-      details: error.message 
-    });
+    console.error('Error in generate handler:', error);
+    
+    // Provide more detailed error information
+    if (error.response) {
+      // OpenAI API error
+      return res.status(500).json({ 
+        error: 'OpenAI API error',
+        details: error.response.data?.error?.message || error.message,
+        code: error.response.status
+      });
+    } else if (error.request) {
+      // Network error
+      return res.status(500).json({ 
+        error: 'Network error connecting to OpenAI',
+        details: 'Please check your internet connection'
+      });
+    } else {
+      // Other error
+      return res.status(500).json({ 
+        error: 'Failed to generate images',
+        details: error.message || 'Unknown error occurred'
+      });
+    }
   }
 }
