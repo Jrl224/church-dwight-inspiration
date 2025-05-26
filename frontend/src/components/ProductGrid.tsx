@@ -10,9 +10,94 @@ interface ProductGridProps {
 const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   const { setSelectedProduct, favorites, toggleFavorite } = useStore();
 
+  // Show single card view for latest product (Tinder-style)
+  if (products.length === 1) {
+    const product = products[0];
+    return (
+      <div className="mt-12 flex justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative max-w-md w-full"
+        >
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div className="aspect-square relative overflow-hidden">
+              <img
+                src={product.imageUrl}
+                alt={product.productName || product.name}
+                className="w-full h-full object-cover"
+              />
+              
+              {product.innovation && (
+                <div className="absolute top-4 left-4 bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                  {product.innovation.split(' ').slice(0, 3).join(' ')}
+                </div>
+              )}
+              
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(product.id);
+                }}
+                className="absolute top-4 right-4 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all"
+              >
+                <svg
+                  className={`w-8 h-8 ${favorites.includes(product.id) ? 'text-red-500 fill-current' : 'text-gray-400'}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <h3 className="font-bold text-2xl text-gray-900 mb-2">
+                {product.productName || product.name}
+              </h3>
+              <p className="text-lg text-gray-600 mb-4">
+                {product.brand} • {product.category?.replace('-', ' ').toUpperCase()}
+              </p>
+              
+              {product.marketDisruption && (
+                <div className="mb-4 p-4 bg-red-50 rounded-lg">
+                  <p className="text-sm text-red-800 font-medium">
+                    🚀 {product.marketDisruption}
+                  </p>
+                </div>
+              )}
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setSelectedProduct(product)}
+                  className="flex-1 px-6 py-3 bg-church-blue text-white rounded-lg font-semibold hover:bg-church-light-blue transition-colors"
+                >
+                  VIEW DETAILS
+                </button>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                >
+                  NEXT
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Grid view for multiple products
   return (
     <div className="mt-12">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {products.slice(-9).map((product, index) => (
           <motion.div
             key={product.id}
@@ -30,7 +115,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 
-                {/* Innovation Tag */}
                 {product.innovation && (
                   <div className="absolute top-4 left-4 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                     {product.innovation.split(' ').slice(0, 2).join(' ')}
@@ -68,7 +152,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
                   {product.brand} • {product.category?.replace('-', ' ').toUpperCase()}
                 </p>
                 
-                {/* Market Disruption Preview */}
                 {product.marketDisruption && (
                   <p className="text-xs text-gray-500 mt-2 line-clamp-2">
                     {product.marketDisruption}
@@ -92,21 +175,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
             </div>
           </motion.div>
         ))}
-        
-        {/* Center "+" button for more variations */}
-        {products.length >= 9 && (
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-                     w-20 h-20 bg-church-blue text-white rounded-full shadow-xl
-                     flex items-center justify-center text-3xl font-bold
-                     hover:bg-church-light-blue transition-colors duration-300"
-            onClick={() => {/* Generate more variations */}}
-          >
-            +
-          </motion.button>
-        )}
       </div>
     </div>
   );
