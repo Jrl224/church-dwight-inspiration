@@ -7,10 +7,21 @@ export interface Product {
   name: string;
   brand: string;
   category: string;
-  features: string[];
+  features: string[] | Record<string, string>;
   sustainabilityScore?: number;
   prompt: string;
   createdAt: Date;
+  
+  // New fields from GPT-4 innovation
+  productName?: string;
+  innovation?: string;
+  marketDisruption?: string;
+  consumerInsight?: string;
+  ingredients?: string | string[];
+  usage?: string;
+  price?: string;
+  sustainability?: string;
+  trend?: string;
 }
 
 interface AppState {
