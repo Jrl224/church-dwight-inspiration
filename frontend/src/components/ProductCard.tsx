@@ -13,13 +13,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onFavorite, isFavori
   const gradient = product.gradient || 'from-blue-400 to-purple-500';
   
   // Check if image is a placeholder
-  const isPlaceholder = product.imageUrl?.includes('placeholder.com') || product.url?.includes('placeholder.com');
+  const isPlaceholder = product.imageUrl?.includes('placeholder.com');
   
   return (
     <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
       {/* Product Image/Gradient */}
       <div className="aspect-square relative overflow-hidden cursor-pointer" onClick={onClick}>
-        {product.imageUrl || product.url ? (
+        {product.imageUrl ? (
           isPlaceholder ? (
             // Enhanced placeholder design
             <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center p-8`}>
@@ -38,7 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onFavorite, isFavori
             </div>
           ) : (
             <img
-              src={product.imageUrl || product.url}
+              src={product.imageUrl}
               alt={product.productName || product.name}
               className="w-full h-full object-cover"
             />
