@@ -11,6 +11,10 @@ interface ProductDetailProps {
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
   const { setSelectedProduct } = useStore();
   const [showMindMap, setShowMindMap] = useState(false);
+  
+  // Check if image is a placeholder
+  const isPlaceholder = product.imageUrl?.includes('placeholder.com') || product.url?.includes('placeholder.com');
+  const gradient = product.gradient || 'from-blue-400 to-purple-500';
 
   return (
     <AnimatePresence>
@@ -41,11 +45,28 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
             <div className="grid md:grid-cols-2 gap-8">
               {/* Product Image */}
               <div className="relative">
-                <img
-                  src={product.imageUrl}
-                  alt={product.productName || product.name}
-                  className="w-full rounded-xl shadow-lg"
-                />
+                {isPlaceholder ? (
+                  <div className={`w-full aspect-square bg-gradient-to-br ${gradient} flex items-center justify-center p-12 rounded-xl shadow-lg`}>
+                    <div className="text-center">
+                      <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-12">
+                        <h3 className="text-4xl font-bold text-white mb-6">
+                          {product.productName || product.name}
+                        </h3>
+                        <div className="bg-white/30 rounded-full px-8 py-4 inline-block">
+                          <p className="text-white font-semibold text-xl">
+                            {product.innovation}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <img
+                    src={product.imageUrl || product.url}
+                    alt={product.productName || product.name}
+                    className="w-full rounded-xl shadow-lg"
+                  />
+                )}
                 {product.sustainability && (
                   <div className="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full font-semibold">
                     ECO-INNOVATION
@@ -59,7 +80,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                   {product.productName || product.name}
                 </h2>
                 <p className="text-xl text-gray-600 mb-4">
-                  {product.brand} • {product.category?.replace('-', ' ').toUpperCase()}
+                  {product.brand} • {product.category?.replace(/-/g, ' ').toUpperCase()}
                 </p>
                 
                 {/* Innovation Tag */}
