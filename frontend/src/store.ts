@@ -12,7 +12,7 @@ export interface Product {
   prompt: string;
   createdAt: Date;
   
-  // Innovation fields
+  // New fields from GPT-4 innovation
   productName?: string;
   innovation?: string;
   marketDisruption?: string;
@@ -22,7 +22,7 @@ export interface Product {
   price?: string;
   sustainability?: string;
   trend?: string;
-  gradient?: string; // For visual display
+  gradient?: string; // For placeholder styling
 }
 
 interface AppState {
@@ -39,7 +39,6 @@ interface AppState {
   setSelectedProduct: (product: Product | null) => void;
   toggleFavorite: (productId: string) => void;
   setSessionId: (sessionId: string) => void;
-  clearProducts: () => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -61,6 +60,5 @@ export const useStore = create<AppState>((set) => ({
       ? state.favorites.filter(id => id !== productId)
       : [...state.favorites, productId]
   })),
-  setSessionId: (sessionId) => set({ sessionId }),
-  clearProducts: () => set({ generatedProducts: [] })
+  setSessionId: (sessionId) => set({ sessionId })
 }));
