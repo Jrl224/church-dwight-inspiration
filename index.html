@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Church & Dwight R&D Innovation Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Grid background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: grid-move 20s linear infinite;
+        }
+
+        @keyframes grid-move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Animated gradient background */
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 123, 255, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(0, 255, 255, 0.15) 0%, transparent 50%);
+            animation: gradient-shift 15s ease-in-out infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            33% { transform: scale(1.1) rotate(120deg); }
+            66% { transform: scale(0.9) rotate(240deg); }
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            padding: 3rem 0;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.8) 0%, rgba(10, 10, 10, 0.4) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.8), transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 200;
+            letter-spacing: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 0.2rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        /* Tools Grid */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        /* Tool Card */
+        .tool-card {
+            position: relative;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.9) 0%, rgba(16, 16, 36, 0.9) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 255, 255, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 255, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.3);
+        }
+
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+
+        .tool-icon {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.1) 0%, rgba(255, 0, 255, 0.1) 100%);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: rgba(0, 255, 255, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .tool-name {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            color: #00ffff;
+        }
+
+        .tool-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .tool-status {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .status-live {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            color: #00ff00;
+        }
+
+        .status-beta {
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid rgba(255, 255, 0, 0.5);
+            color: #ffff00;
+        }
+
+        .status-coming {
+            background: rgba(255, 0, 255, 0.2);
+            border: 1px solid rgba(255, 0, 255, 0.5);
+            color: #ff00ff;
+        }
+
+        .tool-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat {
+            font-size: 0.9rem;
+        }
+
+        .stat-value {
+            color: #00ffff;
+            font-weight: 600;
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0.5;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Launch button */
+        .launch-btn {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+            color: #0a0a0a;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .launch-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .launch-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .launch-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="gradient-bg"></div>
+    
+    <!-- Floating particles -->
+    <div class="particle" style="left: 10%; animation-delay: 0s; color: #00ffff;">⬡</div>
+    <div class="particle" style="left: 20%; animation-delay: 2s; color: #ff00ff;">◆</div>
+    <div class="particle" style="left: 30%; animation-delay: 4s; color: #00ff00;">●</div>
+    <div class="particle" style="left: 40%; animation-delay: 6s; color: #ffff00;">▲</div>
+    <div class="particle" style="left: 50%; animation-delay: 8s; color: #00ffff;">■</div>
+    <div class="particle" style="left: 60%; animation-delay: 10s; color: #ff00ff;">⬟</div>
+    <div class="particle" style="left: 70%; animation-delay: 12s; color: #00ff00;">◉</div>
+    <div class="particle" style="left: 80%; animation-delay: 14s; color: #ffff00;">◆</div>
+    <div class="particle" style="left: 90%; animation-delay: 16s; color: #00ffff;">▼</div>
+
+    <header class="header">
+        <h1>CHURCH & DWIGHT</h1>
+        <p class="subtitle">R&D INNOVATION SUITE</p>
+    </header>
+
+    <div class="container">
+        <div class="tools-grid">
+            <!-- Innovation Inspiration Tool -->
+            <div class="tool-card" onclick="window.location.href='/tools/innovation-inspiration'">
+                <div class="tool-icon">
+                    <img src="/api/images/innovation-inspiration-tool.png" alt="Innovation Inspiration Tool">
+                </div>
+                <h2 class="tool-name">Innovation Inspiration</h2>
+                <span class="tool-status status-live">LIVE</span>
+                <p class="tool-description">AI-powered product concept generator using DALL-E 3. Generate innovative product ideas across all Church & Dwight categories in seconds.</p>
+                <div class="tool-stats">
+                    <div class="stat">Time Saved: <span class="stat-value">4-6 weeks</span></div>
+                    <div class="stat">Users: <span class="stat-value">R&D Teams</span></div>
+                </div>
+                <a href="/tools/innovation-inspiration" class="launch-btn">Launch Tool</a>
+            </div>
+
+            <!-- Formula Generator -->
+            <div class="tool-card">
+                <div class="tool-icon">
+                    <img src="/api/images/formula-generator-tool.png" alt="Formula Generator">
+                </div>
+                <h2 class="tool-name">Formula Generator</h2>
+                <span class="tool-status status-coming">COMING SOON</span>
+                <p class="tool-description">AI-driven ingredient combinations and formulation suggestions. Instantly generate compliant, innovative formulas based on performance requirements.</p>
+                <div class="tool-stats">
+                    <div class="stat">Time Saved: <span class="stat-value">4-6 weeks</span></div>
+                    <div class="stat">Users: <span class="stat-value">Chemists</span></div>
+                </div>
+            </div>
+
+            <!-- Patent Analyzer -->
+            <div class="tool-card">
+                <div class="tool-icon" style="background: linear-gradient(135deg, rgba(255, 123, 0, 0.1) 0%, rgba(255, 0, 0, 0.1) 100%);">
+                    📊
+                </div>
+                <h2 class="tool-name">Patent Analyzer</h2>
+                <span class="tool-status status-coming">COMING SOON</span>
+                <p class="tool-description">Instant patent landscape analysis and freedom-to-operate assessments. Navigate IP challenges with AI-powered insights.</p>
+                <div class="tool-stats">
+                    <div class="stat">Time Saved: <span class="stat-value">2-3 weeks</span></div>
+                    <div class="stat">Users: <span class="stat-value">Legal & R&D</span></div>
+                </div>
+            </div>
+
+            <!-- Stability Predictor -->
+            <div class="tool-card">
+                <div class="tool-icon" style="background: linear-gradient(135deg, rgba(0, 255, 123, 0.1) 0%, rgba(0, 255, 255, 0.1) 100%);">
+                    🔬
+                </div>
+                <h2 class="tool-name">Stability Predictor</h2>
+                <span class="tool-status status-beta">BETA</span>
+                <p class="tool-description">AI-accelerated stability testing predictions. Forecast product shelf life and stability issues before physical testing.</p>
+                <div class="tool-stats">
+                    <div class="stat">Time Saved: <span class="stat-value">3-6 months</span></div>
+                    <div class="stat">Users: <span class="stat-value">QA Teams</span></div>
+                </div>
+            </div>
+
+            <!-- Package Sustainability Scorer -->
+            <div class="tool-card">
+                <div class="tool-icon" style="background: linear-gradient(135deg, rgba(0, 255, 0, 0.1) 0%, rgba(123, 255, 0, 0.1) 100%);">
+                    ♻️
+                </div>
+                <h2 class="tool-name">Package Sustainability</h2>
+                <span class="tool-status status-coming">COMING SOON</span>
+                <p class="tool-description">Instant eco-impact assessment for packaging designs. Optimize for sustainability while maintaining performance.</p>
+                <div class="tool-stats">
+                    <div class="stat">Time Saved: <span class="stat-value">1-2 weeks</span></div>
+                    <div class="stat">Users: <span class="stat-value">Package Design</span></div>
+                </div>
+            </div>
+
+            <!-- Consumer Insight Synthesizer -->
+            <div class="tool-card">
+                <div class="tool-icon" style="background: linear-gradient(135deg, rgba(255, 0, 255, 0.1) 0%, rgba(123, 0, 255, 0.1) 100%);">
+                    🧠
+                </div>
+                <h2 class="tool-name">Consumer Insights</h2>
+                <span class="tool-status status-coming">COMING SOON</span>
+                <p class="tool-description">Real-time social media trend analysis and consumer sentiment tracking. Turn insights into innovation opportunities.</p>
+                <div class="tool-stats">
+                    <div class="stat">Time Saved: <span class="stat-value">2-4 weeks</span></div>
+                    <div class="stat">Users: <span class="stat-value">Marketing & R&D</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add hover effects and interactivity
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                card.style.background = `
+                    radial-gradient(circle at ${x}px ${y}px, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                    linear-gradient(135deg, rgba(26, 26, 46, 0.9) 0%, rgba(16, 16, 36, 0.9) 100%)
+                `;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.background = 'linear-gradient(135deg, rgba(26, 26, 46, 0.9) 0%, rgba(16, 16, 36, 0.9) 100%)';
+            });
+        });
+    </script>
+</body>
+</html>
