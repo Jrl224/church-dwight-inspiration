@@ -12,16 +12,37 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onFavorite, isFavori
   // Extract gradient colors if available
   const gradient = product.gradient || 'from-blue-400 to-purple-500';
   
+  // Check if image is a placeholder
+  const isPlaceholder = product.imageUrl?.includes('placeholder.com') || product.url?.includes('placeholder.com');
+  
   return (
     <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
       {/* Product Image/Gradient */}
       <div className="aspect-square relative overflow-hidden cursor-pointer" onClick={onClick}>
-        {product.imageUrl && !product.imageUrl.includes('placeholder') ? (
-          <img
-            src={product.imageUrl}
-            alt={product.productName || product.name}
-            className="w-full h-full object-cover"
-          />
+        {product.imageUrl || product.url ? (
+          isPlaceholder ? (
+            // Enhanced placeholder design
+            <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center p-8`}>
+              <div className="text-center">
+                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-8">
+                  <h3 className="text-3xl font-bold text-white mb-4">
+                    {product.productName || product.name}
+                  </h3>
+                  <div className="bg-white/30 rounded-full px-6 py-3 inline-block">
+                    <p className="text-white font-semibold text-lg">
+                      {product.innovation}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <img
+              src={product.imageUrl || product.url}
+              alt={product.productName || product.name}
+              className="w-full h-full object-cover"
+            />
+          )
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center p-8`}>
             <div className="text-center">
@@ -73,7 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onFavorite, isFavori
           {product.productName || product.name}
         </h3>
         <p className="text-lg text-gray-600 mb-4">
-          {product.brand} • {product.category?.replace('-', ' ').toUpperCase()}
+          {product.brand} • {product.category?.replace(/-/g, ' ').toUpperCase()}
         </p>
         
         {product.marketDisruption && (
