@@ -13,7 +13,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
   const [showMindMap, setShowMindMap] = useState(false);
   
   // Check if image is a placeholder
-  const isPlaceholder = product.imageUrl?.includes('placeholder.com') || product.url?.includes('placeholder.com');
+  const isPlaceholder = product.imageUrl?.includes('placeholder.com');
   const gradient = product.gradient || 'from-blue-400 to-purple-500';
 
   return (
@@ -62,7 +62,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                   </div>
                 ) : (
                   <img
-                    src={product.imageUrl || product.url}
+                    src={product.imageUrl}
                     alt={product.productName || product.name}
                     className="w-full rounded-xl shadow-lg"
                   />
