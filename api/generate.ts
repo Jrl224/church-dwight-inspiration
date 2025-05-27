@@ -67,8 +67,13 @@ const innovations = [
 ];
 
 function generateConcept(category: string, brand: string) {
+  // Defensive coding - ensure category is valid
+  if (!category || typeof category !== 'string') {
+    category = 'general';
+  }
+  
   const innovation = innovations[Math.floor(Math.random() * innovations.length)];
-  const categoryClean = category.replace('-', ' ');
+  const categoryClean = category.replace(/-/g, ' ');
   
   const productNames: Record<string, string[]> = {
     'laundry': ['UltraClean', 'FreshWave', 'PureWash', 'EcoBoost', 'SmartClean'],
